@@ -1,57 +1,79 @@
 #include<stdio.h>
 #include<ctype.h>
+#include<string.h>
+
 #define MAX 1000
 
-char expr[MAX];
-int idx = 0;
-int error = 0;
-int division_by_0 = 0;
+typedef struct {
+    const char *expr;
+    int idx;
+    int error;
+    int division_by_0;
+} Parser;
 
+int addSub(Parser *p);
 // Read a number
-int getNumber(){
+int getNumber(Parser *p){
     
-    while(isspace(expr[idx])) idx++;
+    if (p->expr[p->idx] == '(') {
+        p->idx++; 
+        int result = addSub(p);
+        while (isspace(p->expr[p->idx])) p->idx++;
+
+        if (p->expr[p->idx] == ')') {
+            p->idx++; 
+            return result;
+        } else {
+            p->error = 1;
+            return 0;
+        }
+    }
+    while(isspace(p->expr[p->idx])) p->idx++;
 
     //to handles negative numbers
     int sign = 1;
-    if(expr[idx] == '-'){
+    if(p->expr[p->idx] == '-'){
         sign = -1;
-        idx++;
+        p->idx++;
+    }
+    else if(p->expr[p->idx] == '+'){
+        sign = 1;
+        p->idx++;
     }
 
-    if(!isdigit(expr[idx])){
-        error = 1;
+    if(!isdigit(p->expr[p->idx])){
+        p->error = 1;
         return 0;
     }
 
     int num = 0;
-    while(isdigit(expr[idx])){
-        num = num * 10 + (expr[idx] - '0');
-        idx++;
+    while(isdigit(p->expr[p->idx])){
+        num = num * 10 + (p->expr[p->idx] - '0');
+        p->idx++;
     }
 
     return sign * num;
 }
 
 //Handle multiplication and divistion
-int mul_div(){
-    int result = getNumber();
+int mulDiv(Parser *p){
+    int result = getNumber(p);
 
-    while(!error){
-        while(isspace(expr[idx])) idx++;
+    while(!p->error){
+        while(isspace(p->expr[p->idx])) p->idx++;
 
-        if(expr[idx] == '*'){
-            idx++;
-            result *= getNumber();
+        if(p->expr[p->idx] == '*'){
+            p->idx++;
+            result *= getNumber(p);
         }
-        else if(expr[idx] == '/'){
-            idx++;
-            int val = getNumber();
+        else if(p->expr[p->idx] == '/'){
+            p->idx++;
+            int val = getNumber(p);
 
-            if(error)return 0;
+            if(p->error)return 0;
 
             if(val == 0){
-                division_by_0 = 1;
+                p->division_by_0 = 1;
                 return 0;
             }
             result /= val;
@@ -63,20 +85,20 @@ int mul_div(){
 }
 
 // Handles addition and subtraction
-int add_sub(){
+int addSub(Parser *p){
 
-    int result = mul_div();
+    int result = mulDiv(p);
     
-    while(!error && !division_by_0){
-        while(isspace(expr[idx])) idx++;
+    while(!p->error && !p->division_by_0){
+        while(isspace(p->expr[p->idx])) p->idx++;
 
-        if(expr[idx] == '+'){
-            idx++;
-            result += mul_div();
+        if(p->expr[p->idx] == '+'){
+            p->idx++;
+            result += mulDiv(p);
         }
-        else if(expr[idx] == '-'){
-            idx++;
-            result -= mul_div();
+        else if(p->expr[p->idx] == '-'){
+            p->idx++;
+            result -= mulDiv(p);
         }
         else
             break;
@@ -85,21 +107,24 @@ int add_sub(){
 }
 
 int main(){
+    char expr[MAX];
 
     printf("Enter Expression\n");
-    fgets(expr , MAX , stdin);
+    if (fgets(expr, sizeof(expr), stdin) == NULL) return 0;
 
-    int result = add_sub();
-    while(isspace(expr[idx])) idx++;
+    expr[strcspn(expr, "\n")] = '\0';
 
-    if(division_by_0)
-        printf("Error: division by 0");
-    
-    else if(error || expr[idx] != '\0')
-        printf("Error: Invalid expression");
-    
+    Parser p = { .expr = expr, .idx = 0, .error = 0, .division_by_0 = 0 };
+
+    int result = addSub(&p);
+    while(isspace(p.expr[p.idx])) p.idx++;
+
+    if(p.division_by_0)
+        printf("error: division by 0\n");
+    else if(p.error || p.expr[p.idx] != '\0')
+        printf("error: Invalid expression\n");
     else
-        printf("Result : %d" , result);
+        printf("Result : %d\n", result);
 
     return 0;
 }
