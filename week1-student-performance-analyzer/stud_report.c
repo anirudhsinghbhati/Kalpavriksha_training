@@ -16,8 +16,8 @@ int totalStudents;
 
 bool isValidName(const char *name) {
     if (name[0] == '\0') return false;
-    for (int i = 0; name[i] != '\0'; i++) {
-        if (!isalpha((unsigned char)name[i])) {
+    for (int charIndex = 0; name[charIndex] != '\0'; charIndex++) {
+        if (!isalpha((unsigned char)name[charIndex])) {
             return false;
         }
     }
@@ -26,8 +26,8 @@ bool isValidName(const char *name) {
 
 int calculateTotal(Student student) {
     int total = 0;
-    for (int i = 0; i < NUM_SUBJECTS; i++) {
-        total += student.marks[i];
+    for (int subjectIndex = 0; subjectIndex < NUM_SUBJECTS; subjectIndex++) {
+        total += student.marks[subjectIndex];
     }
     return total;
 }
@@ -67,7 +67,7 @@ int getStarCount(char grade) {
 void printPerformance(char grade) {
     int stars = getStarCount(grade);
 
-    for (int i = 0; i < stars; i++) {
+    for (int starIndex = 0; starIndex < stars; starIndex++) {
         printf("*");
     }
 
@@ -89,39 +89,39 @@ void printRollNumbers(Student students[], int index) {
 int main() {
     Student students[MAX_STUDENTS];
 
-    int n;
+    int studentCount;
 
     printf("Enter number of students: ");
-    if (scanf("%d", &n) != 1 || n <= 0 || n > MAX_STUDENTS) {
+    if (scanf("%d", &studentCount) != 1 || studentCount <= 0 || studentCount > MAX_STUDENTS) {
         printf("Invalid! Number of Students must be between 1 and %d.\n", MAX_STUDENTS);
         return 1;
     }
 
-    totalStudents = n;
+    totalStudents = studentCount;
     printf("Enter Student details\nROLL_NUM NAME MARKS1 MARKS2 MARKS3\n");
-    for (int i = 0; i < n; i++) {
-        if (scanf("%d %49s", &students[i].rollNumber, students[i].name) != 2) {
-            printf("Invalid input format for student %d!\n", i + 1);
+    for (int studentIndex = 0; studentIndex < studentCount; studentIndex++) {
+        if (scanf("%d %49s", &students[studentIndex].rollNumber, students[studentIndex].name) != 2) {
+            printf("Invalid input format for student %d!\n", studentIndex + 1);
             return 1;
         }
 
-        if (students[i].rollNumber < 0) {
-            printf("Invalid roll number\n");
+        if (students[studentIndex].rollNumber < 0) {
+            printf("Invalid roll number\nt");
             return 1;
         }
 
-        if (!isValidName(students[i].name)) {
+        if (!isValidName(students[studentIndex].name)) {
             printf("Invalid! Name must contain only alphabets\n");
             return 1;
         }
 
-        for (int j = 0; j < NUM_SUBJECTS; j++) {
-            if (scanf("%d", &students[i].marks[j]) != 1) {
+        for (int subjectIndex = 0; subjectIndex < NUM_SUBJECTS; subjectIndex++) {
+            if (scanf("%d", &students[studentIndex].marks[subjectIndex]) != 1) {
                 printf("Invalid marks input");
                 return 1;
             }
 
-            if (students[i].marks[j] < 0 || students[i].marks[j] > 100) {
+            if (students[studentIndex].marks[subjectIndex] < 0 || students[studentIndex].marks[subjectIndex] > 100) {
                 printf("Invalid marks!");
                 return 1;
             }
@@ -129,13 +129,13 @@ int main() {
     }
     printf("\n");
 
-    for (int i = 0; i < n; i++) {
-        int total = calculateTotal(students[i]);
+    for (int studentIndex = 0; studentIndex < studentCount; studentIndex++) {
+        int total = calculateTotal(students[studentIndex]);
         float average = calculateAverage(total);
         char grade = calculateGrade(average);
 
-        printf("Roll: %d\n", students[i].rollNumber);
-        printf("Name: %s\n", students[i].name);
+        printf("Roll: %d\n", students[studentIndex].rollNumber);
+        printf("Name: %s\n", students[studentIndex].name);
         printf("Total: %d\n", total);
         printf("Average: %.2f\n", average);
         printf("Grade: %c\n", grade);
